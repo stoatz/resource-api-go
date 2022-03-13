@@ -13,6 +13,7 @@ import (
 
 type TodoController interface {
 	GetTodos(w http.ResponseWriter, r *http.Request)
+    GetTodoId(w http.ResponseWriter, r *http.Request)
     PostTodo(w http.ResponseWriter, r *http.Request)
     PutTodo(w http.ResponseWriter, r *http.Request)
     DeleteTodo(w http.ResponseWriter, r *http.Request)
@@ -22,7 +23,7 @@ type todoController struct {
 	tr repository.TodoRepository
 }
 
-func NewTodoController(tr repository.TodoRepository) *todoController {
+func NewTodoController(tr repository.TodoRepository) TodoController {
 	return &todoController{tr}
 }
 
@@ -49,15 +50,14 @@ func (tc *todoController) GetTodos(w http.ResponseWriter, r *http.Request) {
 	w.Write(output)
 }
 
-//特定取得
-func (tc *todoController) GetTodoName(w http.ResponseWriter, r *http.Request) {
-    Id, err := strconv.Atoi(path.Base(r.URL.Path))
+func (tc *todoController) GetTodoId(w http.ResponseWriter, r *http.Request) {
+    Id, err := strconv.Atoi(path.Base(r.URL.Path)) // api/users/24
     if err != nil {
         w.WriteHeader(500)
         return
     }
-    todoId := entity.TodoEntity.Id
-    todoId = Id
+    //var todoId  entity.TodoEntity.Id
+    todoId := Id
     todo, err := tc.tr.GetTodoId(todoId)
     if err != nil {
         w.WriteHeader(500)

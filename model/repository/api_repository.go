@@ -11,6 +11,7 @@ import (
 
 type TodoRepository interface {
 	GetTodos() (todos []entity.TodoEntity, err error)
+    GetTodoId(todoId int)(todos entity.TodoEntity, err error)
     InsertTodo(todo entity.TodoEntity) (id int64, err error)
     UpdateTodo(todo entity.TodoEntity) (err error)
     DeleteTodo(id int)(err error)
@@ -21,7 +22,7 @@ type todoRepository struct {
 }
 
 //コンストラクタ (初期化のための関数) (戻り値に構造体のポインタ)
-func NewTodoRepository() TodoRepository {
+func NewTodoRepository() *todoRepository {
 	return &todoRepository{}
 }
 
@@ -51,16 +52,22 @@ func (tr *todoRepository) GetTodos() (todos []entity.TodoEntity, err error) {
 
 
 //特定取得
-func (tr *todoRepository) GetTodoId(todoId entity.TodoEntity) (todos []entity.TodoEntity, err error){
-    todos = []entity.TodoEntity{}
-    row, err := Db.Query("SELECT ID = ? FROM M_User",todoId)
-    todo := entity.TodoEntity{}
-    err = row.Scan(&todoId, &todo.Account, &todo.Name, &todo.Passwd, &todo.Created)
+func (tr *todoRepository) GetTodoId(todoId int) (todo entity.TodoEntity, err error){
+    todos := []entity.TodoEntity{}
+    row, err := Db.Query("SELECT * FROM M_User WHERE ID = ?",todoId)
     if err != nil {
         log.Print(err)
         return
     }
-    todos = append(todos, todo)
+    for row.Next(){
+        todo = entity.TodoEntity{}
+        err = row.Scan(&todoId, &todo.Account, &todo.Name, &todo.Passwd, &todo.Created)
+        if err != nil {
+            log.Print(err)
+            return
+        }
+        todos = append(todos, todo)
+    }
     return
 }
 
